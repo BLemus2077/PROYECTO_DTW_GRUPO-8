@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario de Vehículos - Sistema de Gestión</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- Navegación Principal -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">Inventario de Vehículos</div>
+            <ul class="nav-menu">
+                <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
+                <li><a href="#" onclick="showSection('inventory')">Inventario</a></li>
+                <li><a href="#" onclick="showSection('register')">Registrar Vehículo</a></li>
+                <li><a href="#" onclick="showSection('api')">API & Ubicación</a></li>
+                <li><a href="#" onclick="showSection('about')">Acerca de</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Contenedor Principal -->
+    <main class="container">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section active">
+            <div class="section-header">
+                <h1>Dashboard de Estadísticas</h1>
+                <p>Información resumida del inventario de vehículos</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <h3>Total de Vehículos</h3>
+                        <p class="stat-number" id="totalVehicles">0</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <h3>Disponibles</h3>
+                        <p class="stat-number" id="availableVehicles">0</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <h3>Vendidos</h3>
+                        <p class="stat-number" id="soldVehicles">0</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🔧</div>
+                    <div class="stat-content">
+                        <h3>En Mantenimiento</h3>
+                        <p class="stat-number" id="maintenanceVehicles">0</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">💵</div>
+                    <div class="stat-content">
+                        <h3>Precio Promedio</h3>
+                        <p class="stat-number" id="averagePrice">$0</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📍</div>
+                    <div class="stat-content">
+                        <h3>Última Visita</h3>
+                        <p class="stat-info" id="lastVisit">Cargando...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>Estado de Vehículos</h2>
+                <canvas id="vehicleStatusChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Inventory Section -->
+        <section id="inventory" class="section">
+            <div class="section-header">
+                <h1>Inventario de Vehículos</h1>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Buscar por marca, modelo o placa...">
+                    <button onclick="searchVehicles()" class="btn btn-primary">Buscar</button>
+                    <button onclick="clearSearch()" class="btn btn-secondary">Limpiar</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="vehicleTable" class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>Año</th>
+                            <th>Color</th>
+                            <th>Placa</th>
+                            <th>Estado</th>
+                            <th>Precio</th>
+                            <th>Fecha de Registro</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehicleTableBody">
+                        <tr>
+                            <td colspan="10" class="empty-message">No hay vehículos registrados</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Register Vehicle Section -->
+        <section id="register" class="section">
+            <div class="section-header">
+                <h1>Registrar Nuevo Vehículo</h1>
+                <p>Complete el formulario para agregar un vehículo al inventario</p>
+            </div>
+
+            <form id="vehicleForm" class="form-container">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="brand">Marca <span class="required">*</span></label>
+                        <input type="text" id="brand" name="brand" required>
+                        <span class="error-message" id="brandError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="model">Modelo <span class="required">*</span></label>
+                        <input type="text" id="model" name="model" required>
+                        <span class="error-message" id="modelError"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="year">Año <span class="required">*</span></label>
+                        <input type="number" id="year" name="year" min="1900" required>
+                        <span class="error-message" id="yearError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="color">Color <span class="required">*</span></label>
+                        <input type="text" id="color" name="color" required>
+                        <span class="error-message" id="colorError"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="plate">Placa <span class="required">*</span></label>
+                        <input type="text" id="plate" name="plate" placeholder="ABC-1234" required>
+                        <span class="error-message" id="plateError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">Estado <span class="required">*</span></label>
+                        <select id="status" name="status" required>
+                            <option value="">Seleccionar estado</option>
+                            <option value="Disponible">Disponible</option>
+                            <option value="Vendido">Vendido</option>
+                            <option value="En mantenimiento">En mantenimiento</option>
+                        </select>
+                        <span class="error-message" id="statusError"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="price">Precio <span class="required">*</span></label>
+                        <input type="number" id="price" name="price" min="0" step="0.01" required>
+                        <span class="error-message" id="priceError"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="latitude">Latitud</label>
+                        <input type="text" id="latitude" name="latitude" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="longitude">Longitud</label>
+                        <input type="text" id="longitude" name="longitude" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="button" onclick="getGeolocation()" class="btn btn-secondary">Obtener Ubicación</button>
+                    <button type="submit" class="btn btn-primary">Registrar Vehículo</button>
+                    <button type="reset" class="btn btn-secondary">Limpiar Formulario</button>
+                </div>
+
+                <div id="formMessage" class="form-message"></div>
+            </form>
+        </section>
+
+        <!-- API & Geolocation Section -->
+        <section id="api" class="section">
+            <div class="section-header">
+                <h1>API & Geolocalización</h1>
+                <p>Información adicional del sistema</p>
+            </div>
+
+            <div class="api-grid">
+                <!-- Countries API -->
+                <div class="api-card">
+                    <h2>Información de Países</h2>
+                    <p>Busca información de un país desde una API pública</p>
+                    <div class="api-form">
+                        <input type="text" id="countryInput" placeholder="Ej: Colombia">
+                        <button onclick="searchCountry()" class="btn btn-primary">Buscar País</button>
+                    </div>
+                    <div id="countryResult" class="api-result"></div>
+                </div>
+
+                <!-- Weather API -->
+                <div class="api-card">
+                    <h2>Ubicación Actual</h2>
+                    <p>Tu ubicación geográfica</p>
+                    <button onclick="getUserLocation()" class="btn btn-primary">Obtener Ubicación</button>
+                    <div id="locationResult" class="api-result"></div>
+                </div>
+
+                <!-- User Information -->
+                <div class="api-card">
+                    <h2>Información del Usuario</h2>
+                    <p>Nombre y email registrados en el sistema</p>
+                    <div class="api-form">
+                        <input type="text" id="userName" placeholder="Tu nombre">
+                        <input type="email" id="userEmail" placeholder="Tu email">
+                        <button onclick="saveUserInfo()" class="btn btn-primary">Guardar</button>
+                    </div>
+                    <div id="userResult" class="api-result"></div>
+                </div>
+
+                <!-- System Information -->
+                <div class="api-card">
+                    <h2>Información del Sistema</h2>
+                    <p>Detalles del navegador y dispositivo</p>
+                    <button onclick="showSystemInfo()" class="btn btn-primary">Ver Información</button>
+                    <div id="systemResult" class="api-result"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section">
+            <div class="section-header">
+                <h1>Acerca del Proyecto</h1>
+            </div>
+
+            <div class="about-content">
+                <div class="about-card">
+                    <h2>Sistema de Inventario de Vehículos</h2>
+                    <p>
+                        Aplicación web desarrollada con HTML5, CSS3 y JavaScript puro.
+                        Sin backend ni base de datos, almacenando toda la información en el navegador.
+                    </p>
+                </div>
+
+                <div class="about-card">
+                    <h2>Características Principales</h2>
+                    <ul>
+                        <li>CRUD completo para gestión de vehículos</li>
+                        <li>Dashboard con estadísticas en tiempo real</li>
+                        <li>Almacenamiento persistente con LocalStorage</li>
+                        <li>Información temporal con SessionStorage</li>
+                        <li>Consumo de APIs REST públicas</li>
+                        <li>Geolocalización del navegador</li>
+                        <li>Web Workers para procesamiento paralelo</li>
+                        <li>Validaciones completas de formularios</li>
+                        <li>Búsqueda y filtrado de vehículos</li>
+                        <li>Diseño responsivo</li>
+                    </ul>
+                </div>
+
+                <div class="about-card">
+                    <h2>Tecnologías Utilizadas</h2>
+                    <p>
+                        <strong>Frontend:</strong><br>
+                        - HTML5 (Estructura semántica)<br>
+                        - CSS3 (Diseño responsivo)<br>
+                        - JavaScript (Lógica de negocio)<br>
+                        <br>
+                        <strong>APIs y Servicios:</strong><br>
+                        - REST Countries API<br>
+                        - Geolocation API<br>
+                        - LocalStorage API<br>
+                        - SessionStorage API<br>
+                        - Web Workers API<br>
+                    </p>
+                </div>
+
+                <div class="about-card">
+                    <h2>Funcionalidades del Código</h2>
+                    <p>
+                        <strong>Validaciones:</strong><br>
+                        - Campos no vacíos<br>
+                        - Año válido<br>
+                        - Precio mayor que cero<br>
+                        - Placas únicas<br>
+                        <br>
+                        <strong>Procesamiento:</strong><br>
+                        - Manejo de errores con try/catch<br>
+                        - Manipulación del DOM<br>
+                        - Eventos JavaScript<br>
+                        - Comunicación con Web Worker<br>
+                    </p>
+                </div>
+
+                <div class="about-card">
+                    <h2>Almacenamiento de Datos</h2>
+                    <p>
+                        <strong>LocalStorage:</strong><br>
+                        Todos los vehículos registrados se guardan permanentemente.<br>
+                        <br>
+                        <strong>SessionStorage:</strong><br>
+                        - Última visita del usuario<br>
+                        - Nombre del usuario<br>
+                        - Email del usuario<br>
+                        - Última búsqueda realizada<br>
+                    </p>
+                </div>
+
+                <div class="about-card">
+                    <h2>Versión</h2>
+                    <p>
+                        <strong>v1.0.0</strong><br>
+                        Año: 2026<br>
+                        Estado: Producción<br>
+                        Licencia: Libre para uso educativo
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para Editar Vehículo -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h2>Editar Vehículo</h2>
+            <form id="editForm" class="form-container">
+                <input type="hidden" id="editId">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editBrand">Marca</label>
+                        <input type="text" id="editBrand" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editModel">Modelo</label>
+                        <input type="text" id="editModel" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editYear">Año</label>
+                        <input type="number" id="editYear" min="1900" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editColor">Color</label>
+                        <input type="text" id="editColor" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editPlate">Placa</label>
+                        <input type="text" id="editPlate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStatus">Estado</label>
+                        <select id="editStatus" required>
+                            <option value="Disponible">Disponible</option>
+                            <option value="Vendido">Vendido</option>
+                            <option value="En mantenimiento">En mantenimiento</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editPrice">Precio</label>
+                        <input type="number" id="editPrice" min="0" step="0.01" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" onclick="closeEditModal()" class="btn btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Chart.js para gráficos -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="js/state.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/validation.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/crud.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/geolocation.js"></script>
+    <script src="js/app.js"></script>
+    
+</body>
+</html>
