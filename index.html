@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario de Vehículos - Sistema de Gestión</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Navegación Principal -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">🚗 Inventario de Vehículos</div>
+            <button class="nav-toggle" id="navToggle" aria-label="Menú">&#9776;</button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
+                <li><a href="#" onclick="showSection('inventory')">Inventario</a></li>
+                <li><a href="#" onclick="showSection('register')">Registrar Vehículo</a></li>
+                <li><a href="#" onclick="showSection('api')">API &amp; Ubicación</a></li>
+                <li><a href="#" onclick="showSection('about')">Acerca de</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Contenedor Principal -->
+    <main class="container">
+
+        <!-- ============================================================
+             DASHBOARD
+        ============================================================ -->
+        <section id="dashboard" class="section active">
+            <div class="section-header">
+                <h1>Dashboard de Estadísticas</h1>
+                <p>Información resumida del inventario de vehículos</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card" style="--card-accent:#3b82f6">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <h3>Total de Vehículos</h3>
+                        <p class="stat-number" id="totalVehicles">0</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="--card-accent:#22c55e">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <h3>Disponibles</h3>
+                        <p class="stat-number" id="availableVehicles">0</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="--card-accent:#3b82f6">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <h3>Vendidos</h3>
+                        <p class="stat-number" id="soldVehicles">0</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="--card-accent:#f59e0b">
+                    <div class="stat-icon">🔧</div>
+                    <div class="stat-content">
+                        <h3>En Mantenimiento</h3>
+                        <p class="stat-number" id="maintenanceVehicles">0</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="--card-accent:#8b5cf6">
+                    <div class="stat-icon">💵</div>
+                    <div class="stat-content">
+                        <h3>Precio Promedio</h3>
+                        <p class="stat-number" id="averagePrice">$0</p>
+                    </div>
+                </div>
+                <div class="stat-card" style="--card-accent:#06b6d4">
+                    <div class="stat-icon">🕐</div>
+                    <div class="stat-content">
+                        <h3>Última Visita</h3>
+                        <p class="stat-info" id="lastVisit">Cargando...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>Estado de Vehículos</h2>
+                <div class="chart-wrap">
+                    <canvas id="vehicleStatusChart"></canvas>
+                </div>
+            </div>
+
+            <p class="worker-badge" id="workerBadge">
+                <span class="worker-dot"></span> Web Worker activo
+            </p>
+        </section>
+
+        <!-- ============================================================
+             INVENTARIO
+        ============================================================ -->
+        <section id="inventory" class="section">
+            <div class="section-header">
+                <h1>Inventario de Vehículos</h1>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Buscar por marca, modelo o placa...">
+                    <button onclick="searchVehicles()" class="btn btn-primary">Buscar</button>
+                    <button onclick="clearSearch()" class="btn btn-secondary">Limpiar</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="vehicleTable" class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>Año</th>
+                            <th>Color</th>
+                            <th>Placa</th>
+                            <th>Estado</th>
+                            <th>Precio</th>
+                            <th>Departamento</th>
+                            <th>Fecha Registro</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehicleTableBody">
+                        <tr>
+                            <td colspan="11" class="empty-message">No hay vehículos registrados</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             REGISTRAR VEHÍCULO
+        ============================================================ -->
+        <section id="register" class="section">
+            <div class="section-header">
+                <h1>Registrar Nuevo Vehículo</h1>
+                <p>Complete el formulario para agregar un vehículo al inventario</p>
+            </div>
+
+            <form id="vehicleForm" class="form-container" novalidate>
+
+                <!-- Datos del vehículo -->
+                <div class="form-block">
+                    <h3 class="form-block-title">Datos del Vehículo</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="brand">Marca <span class="required">*</span></label>
+                            <input type="text" id="brand" name="brand" placeholder="Toyota, Honda, Nissan...">
+                            <span class="error-message" id="brandError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Modelo <span class="required">*</span></label>
+                            <input type="text" id="model" name="model" placeholder="Corolla, Civic...">
+                            <span class="error-message" id="modelError"></span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="year">Año <span class="required">*</span></label>
+                            <input type="number" id="year" name="year" min="1900" max="2027" placeholder="2020">
+                            <span class="error-message" id="yearError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="color">Color <span class="required">*</span></label>
+                            <input type="text" id="color" name="color" placeholder="Blanco, Negro, Plata...">
+                            <span class="error-message" id="colorError"></span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="plate">Placa <span class="required">*</span></label>
+                            <input type="text" id="plate" name="plate" placeholder="P-123456">
+                            <span class="error-message" id="plateError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Estado <span class="required">*</span></label>
+                            <select id="status" name="status">
+                                <option value="">Seleccionar estado</option>
+                                <option value="Disponible">Disponible</option>
+                                <option value="Vendido">Vendido</option>
+                                <option value="En mantenimiento">En mantenimiento</option>
+                            </select>
+                            <span class="error-message" id="statusError"></span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="price">Precio ($) <span class="required">*</span></label>
+                            <input type="number" id="price" name="price" min="0" step="0.01" placeholder="15000">
+                            <span class="error-message" id="priceError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="origin">País de Origen</label>
+                            <select id="origin" name="origin">
+                                <option value="Japón">Japón</option>
+                                <option value="Estados Unidos">Estados Unidos</option>
+                                <option value="Corea del Sur">Corea del Sur</option>
+                                <option value="Alemania">Alemania</option>
+                                <option value="China">China</option>
+                                <option value="México">México</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ubicación en El Salvador -->
+                <div class="form-block location-block">
+                    <h3 class="form-block-title">📍 Ubicación en El Salvador</h3>
+                    <p class="location-hint">Selecciona el departamento donde se encuentra el vehículo o usa tu ubicación GPS.</p>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="department">Departamento <span class="required">*</span></label>
+                            <select id="department" name="department">
+                                <option value="">-- Seleccionar departamento --</option>
+                                <option value="Ahuachapán">Ahuachapán</option>
+                                <option value="Cabañas">Cabañas</option>
+                                <option value="Chalatenango">Chalatenango</option>
+                                <option value="Cuscatlán">Cuscatlán</option>
+                                <option value="La Libertad">La Libertad</option>
+                                <option value="La Paz">La Paz</option>
+                                <option value="La Unión">La Unión</option>
+                                <option value="Morazán">Morazán</option>
+                                <option value="San Miguel">San Miguel</option>
+                                <option value="San Salvador">San Salvador</option>
+                                <option value="San Vicente">San Vicente</option>
+                                <option value="Santa Ana">Santa Ana</option>
+                                <option value="Sonsonate">Sonsonate</option>
+                                <option value="Usulután">Usulután</option>
+                            </select>
+                            <span class="error-message" id="deptError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Dirección (opcional)</label>
+                            <input type="text" id="address" name="address" placeholder="Ej: Km 12, Bodega 3...">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="latitude">Latitud GPS</label>
+                            <input type="text" id="latitude" name="latitude" readonly placeholder="Usar botón GPS">
+                        </div>
+                        <div class="form-group">
+                            <label for="longitude">Longitud GPS</label>
+                            <input type="text" id="longitude" name="longitude" readonly placeholder="Usar botón GPS">
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="getGeolocation()" class="btn btn-geo">
+                        📡 Capturar mi ubicación GPS actual
+                    </button>
+                    <p class="geo-status" id="geoStatus"></p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Registrar Vehículo</button>
+                    <button type="reset" class="btn btn-secondary" id="btnReset">Limpiar Formulario</button>
+                </div>
+
+                <div id="formMessage" class="form-message"></div>
+            </form>
+        </section>
+
+        <!-- ============================================================
+             API & UBICACIÓN  (clima simplificado + ubicación actual)
+        ============================================================ -->
+        <section id="api" class="section">
+            <div class="section-header">
+                <h1>API &amp; Ubicación</h1>
+                <p>Clima actual y herramientas de geolocalización del sistema</p>
+            </div>
+
+            <div class="api-grid">
+
+                <!-- CLIMA ACTUAL -->
+                <div class="api-card api-card--clima">
+                    <h2>🌤 Clima Actual</h2>
+                    <p>Temperatura y condiciones en tu ubicación, vía Geolocalización + Open-Meteo API</p>
+                    <button onclick="cargarClima()" class="btn btn-primary">Obtener Clima</button>
+                    <div id="climaResult" class="api-result"></div>
+                    <p class="api-footnote">Fuente: <strong>Open-Meteo</strong> · Fetch API · JSON</p>
+                </div>
+
+                <!-- UBICACIÓN ACTUAL -->
+                <div class="api-card">
+                    <h2>📍 Ubicación Actual</h2>
+                    <p>Consulta tus coordenadas GPS en tiempo real</p>
+                    <button onclick="getUserLocation()" class="btn btn-primary">Obtener Ubicación</button>
+                    <div id="locationResult" class="api-result"></div>
+                </div>
+
+                <!-- INFORMACIÓN DEL USUARIO -->
+                <div class="api-card">
+                    <h2>👤 Información del Usuario</h2>
+                    <p>Nombre y email registrados en la sesión</p>
+                    <div class="api-form">
+                        <input type="text" id="userName" placeholder="Tu nombre">
+                        <input type="email" id="userEmail" placeholder="Tu email">
+                        <button onclick="saveUserInfo()" class="btn btn-primary">Guardar</button>
+                    </div>
+                    <div id="userResult" class="api-result"></div>
+                </div>
+
+                <!-- INFORMACIÓN DEL SISTEMA -->
+                <div class="api-card">
+                    <h2>🖥 Información del Sistema</h2>
+                    <p>Detalles del navegador y almacenamiento</p>
+                    <button onclick="showSystemInfo()" class="btn btn-primary">Ver Información</button>
+                    <div id="systemResult" class="api-result"></div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ============================================================
+             ACERCA DE
+        ============================================================ -->
+        <section id="about" class="section">
+            <div class="section-header">
+                <h1>Acerca del Proyecto</h1>
+            </div>
+
+            <div class="about-content">
+                <div class="about-card">
+                    <h2>Sistema de Inventario de Vehículos</h2>
+                    <p>Aplicación web desarrollada con HTML5, CSS3 y JavaScript puro. Sin backend ni base de datos; toda la información se almacena en el navegador del usuario.</p>
+                </div>
+
+                <div class="about-card">
+                    <h2>Características Principales</h2>
+                    <ul>
+                        <li>CRUD completo para gestión de vehículos</li>
+                        <li>Registro de ubicación por departamento (El Salvador)</li>
+                        <li>Dashboard con estadísticas en tiempo real</li>
+                        <li>Almacenamiento persistente con LocalStorage</li>
+                        <li>Información temporal con SessionStorage</li>
+                        <li>Consumo de API REST (Open-Meteo)</li>
+                        <li>Geolocalización del navegador</li>
+                        <li>Web Workers para procesamiento paralelo</li>
+                        <li>Validaciones completas de formularios</li>
+                        <li>Búsqueda y filtrado de vehículos</li>
+                        <li>Diseño responsivo</li>
+                    </ul>
+                </div>
+
+                <div class="about-card">
+                    <h2>Tecnologías Utilizadas</h2>
+                    <p>
+                        <strong>Frontend:</strong><br>
+                        - HTML5 (Estructura semántica)<br>
+                        - CSS3 (Diseño responsivo)<br>
+                        - JavaScript ES6+ (Lógica de negocio)<br>
+                        <br>
+                        <strong>APIs y Servicios:</strong><br>
+                        - Open-Meteo API (clima, JSON)<br>
+                        - Geolocation API<br>
+                        - LocalStorage API<br>
+                        - SessionStorage API<br>
+                        - Web Workers API<br>
+                        - Chart.js (gráficos)
+                    </p>
+                </div>
+
+                <div class="about-card">
+                    <h2>Funcionalidades del Código</h2>
+                    <p>
+                        <strong>Validaciones:</strong><br>
+                        - Campos no vacíos<br>
+                        - Año válido<br>
+                        - Precio mayor que cero<br>
+                        - Placas únicas<br>
+                        - Departamento requerido<br>
+                        <br>
+                        <strong>Procesamiento:</strong><br>
+                        - Manejo de errores con try/catch<br>
+                        - Manipulación del DOM<br>
+                        - Eventos JavaScript<br>
+                        - Comunicación con Web Worker
+                    </p>
+                </div>
+
+                <div class="about-card">
+                    <h2>Almacenamiento de Datos</h2>
+                    <p>
+                        <strong>LocalStorage:</strong><br>
+                        Todos los vehículos registrados se guardan permanentemente.<br>
+                        <br>
+                        <strong>SessionStorage:</strong><br>
+                        - Última visita del usuario<br>
+                        - Nombre del usuario<br>
+                        - Email del usuario<br>
+                        - Última búsqueda realizada
+                    </p>
+                </div>
+
+                <div class="about-card">
+                    <h2>Versión</h2>
+                    <p>
+                        <strong>v1.0.0</strong><br>
+                        Año: 2026<br>
+                        Estado: Producción<br>
+                        Licencia: Libre para uso educativo
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main><!-- /container -->
+
+    <!-- ============================================================
+         MODAL EDITAR VEHÍCULO
+    ============================================================ -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <button class="close" onclick="closeEditModal()" aria-label="Cerrar">&times;</button>
+            <h2>Editar Vehículo</h2>
+            <form id="editForm" class="form-container" novalidate>
+                <input type="hidden" id="editId">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editBrand">Marca</label>
+                        <input type="text" id="editBrand" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editModel">Modelo</label>
+                        <input type="text" id="editModel" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editYear">Año</label>
+                        <input type="number" id="editYear" min="1900" max="2027" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editColor">Color</label>
+                        <input type="text" id="editColor" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editPlate">Placa</label>
+                        <input type="text" id="editPlate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStatus">Estado</label>
+                        <select id="editStatus" required>
+                            <option value="Disponible">Disponible</option>
+                            <option value="Vendido">Vendido</option>
+                            <option value="En mantenimiento">En mantenimiento</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editPrice">Precio ($)</label>
+                        <input type="number" id="editPrice" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDepartment">Departamento</label>
+                        <select id="editDepartment">
+                            <option value="">-- Sin departamento --</option>
+                            <option value="Ahuachapán">Ahuachapán</option>
+                            <option value="Cabañas">Cabañas</option>
+                            <option value="Chalatenango">Chalatenango</option>
+                            <option value="Cuscatlán">Cuscatlán</option>
+                            <option value="La Libertad">La Libertad</option>
+                            <option value="La Paz">La Paz</option>
+                            <option value="La Unión">La Unión</option>
+                            <option value="Morazán">Morazán</option>
+                            <option value="San Miguel">San Miguel</option>
+                            <option value="San Salvador">San Salvador</option>
+                            <option value="San Vicente">San Vicente</option>
+                            <option value="Santa Ana">Santa Ana</option>
+                            <option value="Sonsonate">Sonsonate</option>
+                            <option value="Usulután">Usulután</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:1rem">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" onclick="closeEditModal()" class="btn btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
