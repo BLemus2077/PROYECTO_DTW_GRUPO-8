@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario de Autos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICA8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI3IiBmaWxsPSIjMjU2M2ViIi8+CiAgPHJlY3QgeD0iNSIgeT0iMTYiIHdpZHRoPSIyMiIgaGVpZ2h0PSI4IiByeD0iMiIgZmlsbD0id2hpdGUiLz4KICA8cGF0aCBkPSJNOSAxNiBMMTEgMTAgTDIxIDEwIEwyMyAxNiBaIiBmaWxsPSJ3aGl0ZSIvPgogIDxwYXRoIGQ9Ik0xMiAxNSBMMTMgMTEuNSBMMTkgMTEuNSBMMjAgMTUgWiIgZmlsbD0iIzI1NjNlYiIvPgogIDxjaXJjbGUgY3g9IjEwIiBjeT0iMjQiIHI9IjMiIGZpbGw9IiMxZTI5M2IiLz4KICA8Y2lyY2xlIGN4PSIxMCIgY3k9IjI0IiByPSIxLjUiIGZpbGw9IndoaXRlIi8+CiAgPGNpcmNsZSBjeD0iMjIiIGN5PSIyNCIgcj0iMyIgZmlsbD0iIzFlMjkzYiIvPgogIDxjaXJjbGUgY3g9IjIyIiBjeT0iMjQiIHI9IjEuNSIgZmlsbD0id2hpdGUiLz4KPC9zdmc+">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="34" height="34" style="flex-shrink:0">
+        <rect width="32" height="32" rx="7" fill="#2563eb"/>
+        <rect x="5" y="16" width="22" height="8" rx="2" fill="white"/>
+        <path d="M9 16 L11 10 L21 10 L23 16 Z" fill="white"/>
+        <path d="M12 15 L13 11.5 L19 11.5 L20 15 Z" fill="#2563eb"/>
+        <circle cx="10" cy="24" r="3" fill="#1e293b"/>
+        <circle cx="10" cy="24" r="1.5" fill="white"/>
+        <circle cx="22" cy="24" r="3" fill="#1e293b"/>
+        <circle cx="22" cy="24" r="1.5" fill="white"/>
+      </svg>
+      <div class="logo-text"><em>Inventario</em><br>de Autos</div>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><button class="nav-link" data-section="dashboard" onclick="showSection('dashboard')"><span class="nav-icon">📊</span> Dashboard</button></li>
+    <li><button class="nav-link" data-section="inventario" onclick="showSection('inventario')"><span class="nav-icon">🗂️</span> Inventario</button></li>
+    <li><button class="nav-link" data-section="registrar" onclick="showSection('registrar')"><span class="nav-icon">➕</span> Registrar</button></li>
+    <li><button class="nav-link" data-section="mapa" onclick="showSection('mapa')"><span class="nav-icon">🗺️</span> Mapa SV</button></li>
+    <li><button class="nav-link" data-section="clima" onclick="showSection('clima')"><span class="nav-icon">🌤</span> Clima</button></li>
+  </ul>
+</aside>
+
+<main class="main-content">
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="section">
+    <div class="page-header">
+      <h1>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28" style="vertical-align:middle;margin-right:6px;flex-shrink:0">
+          <rect width="32" height="32" rx="7" fill="#2563eb"/>
+          <rect x="5" y="16" width="22" height="8" rx="2" fill="white"/>
+          <path d="M9 16 L11 10 L21 10 L23 16 Z" fill="white"/>
+          <path d="M12 15 L13 11.5 L19 11.5 L20 15 Z" fill="#2563eb"/>
+          <circle cx="10" cy="24" r="3" fill="#1e293b"/>
+          <circle cx="10" cy="24" r="1.5" fill="white"/>
+          <circle cx="22" cy="24" r="3" fill="#1e293b"/>
+          <circle cx="22" cy="24" r="1.5" fill="white"/>
+        </svg>
+        Dashboard <span class="badge badge-live">EN VIVO</span>
+      </h1>
+      <p class="subtitle">Estadísticas procesadas por Web Worker en tiempo real</p>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card c-blue">
+        <div class="metric-icon">📦</div>
+        <div class="metric-val" id="metTotal">0</div>
+        <div class="metric-label">Total vehículos</div>
+      </div>
+      <div class="metric-card c-green">
+        <div class="metric-icon">✅</div>
+        <div class="metric-val" id="metDisp">0</div>
+        <div class="metric-label">Disponibles</div>
+      </div>
+      <div class="metric-card c-blue">
+        <div class="metric-icon">💰</div>
+        <div class="metric-val" id="metVend">0</div>
+        <div class="metric-label">Vendidos</div>
+      </div>
+      <div class="metric-card c-yellow">
+        <div class="metric-icon">🔖</div>
+        <div class="metric-val" id="metRes">0</div>
+        <div class="metric-label">Reservados</div>
+      </div>
+      <div class="metric-card c-purple">
+        <div class="metric-icon">💵</div>
+        <div class="metric-val" id="metValor">$0</div>
+        <div class="metric-label">Valor total</div>
+      </div>
+      <div class="metric-card c-red">
+        <div class="metric-icon">📍</div>
+        <div class="metric-val" id="metUbic">0</div>
+        <div class="metric-label">Departamentos</div>
+      </div>
+    </div>
+
+    <div class="dash-row">
+      <div class="chart-card narrow">
+        <h3>Estado del inventario</h3>
+        <canvas id="chartEstados" width="260" height="190"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Marcas más registradas</h3>
+        <canvas id="chartMarcas" width="420" height="190"></canvas>
+      </div>
+    </div>
+
+    <div class="dash-row">
+      <div class="chart-card">
+        <h3>Distribución por año</h3>
+        <canvas id="chartAnios" width="360" height="170"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Vehículos por departamento</h3>
+        <canvas id="chartDeptos" width="360" height="170"></canvas>
+      </div>
+    </div>
+
+    <div class="recientes-card">
+      <h3>Últimos registrados</h3>
+      <div class="recientes-list" id="listaRecientes">
+        <p class="empty-hint">Sin vehículos aún.</p>
+      </div>
+    </div>
+
+    <p class="worker-badge" id="workerBadge">
+      <span class="worker-dot"></span> Iniciando Web Worker…
+    </p>
+    <p style="font-size:11px;color:var(--text3);margin-top:4px;">
+      Última visita: <span id="lastVisit">—</span>
+    </p>
+  </section>
+
+  <!-- INVENTARIO -->
+  <section id="inventario" class="section">
+    <div class="page-header">
+      <h1>🗂️ Inventario</h1>
+      <p class="subtitle">Gestión completa de vehículos registrados</p>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar por placa, marca, modelo, departamento…">
+      <button class="btn btn-outline btn-sm" onclick="Inventario.limpiarBusqueda()">✕ Limpiar</button>
+      <button class="btn btn-primary btn-sm" onclick="showSection('registrar')">+ Registrar</button>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Placa</th><th>Marca</th><th>Modelo</th><th>Año</th>
+            <th>Color</th><th>Estado</th><th>Precio</th>
+            <th>Departamento</th><th>Registro</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="vehicleTableBody">
+          <tr><td colspan="10" class="empty-msg">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- REGISTRAR -->
+  <section id="registrar" class="section">
+    <div class="page-header">
+      <h1>➕ Registrar vehículo</h1>
+      <p class="subtitle">Completa todos los campos requeridos</p>
+    </div>
+
+    <form id="regForm" novalidate>
+      <div class="form-card">
+        <div class="form-section-title">🚗 Datos del vehículo</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Placa *</label>
+            <input type="text" id="placa" placeholder="P-123456">
+            <span class="error-msg" id="regError_placa"></span>
+          </div>
+          <div class="form-group">
+            <label>Marca *</label>
+            <input type="text" id="marca" placeholder="Toyota, Honda…">
+            <span class="error-msg" id="regError_marca"></span>
+          </div>
+          <div class="form-group">
+            <label>Modelo *</label>
+            <input type="text" id="modelo" placeholder="Corolla, Civic…">
+            <span class="error-msg" id="regError_modelo"></span>
+          </div>
+          <div class="form-group">
+            <label>Año *</label>
+            <input type="number" id="anio" min="1900" max="2027" placeholder="2022">
+            <span class="error-msg" id="regError_anio"></span>
+          </div>
+          <div class="form-group">
+            <label>Color *</label>
+            <input type="text" id="color" placeholder="Blanco, Negro…">
+            <span class="error-msg" id="regError_color"></span>
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="tipo">
+              <option value="">— Seleccionar —</option>
+              <option>Sedán</option><option>SUV</option><option>Pick-up</option>
+              <option>Hatchback</option><option>Van</option><option>Camión</option><option>Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Estado *</label>
+            <select id="estado">
+              <option value="">— Seleccionar —</option>
+              <option>Disponible</option><option>Vendido</option><option>Reservado</option>
+            </select>
+            <span class="error-msg" id="regError_estado"></span>
+          </div>
+          <div class="form-group">
+            <label>Precio ($) *</label>
+            <input type="number" id="precio" min="0" step="0.01" placeholder="15000">
+            <span class="error-msg" id="regError_precio"></span>
+          </div>
+          <div class="form-group">
+            <label>Origen</label>
+            <select id="origen">
+              <option value="">— Seleccionar —</option>
+              <option>El Salvador</option><option>Japón</option><option>Estados Unidos</option>
+              <option>Corea del Sur</option><option>Alemania</option><option>México</option><option>Otro</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Notas</label>
+            <textarea id="notas" placeholder="Condición, extras, observaciones…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section-title">📍 Ubicación de registro</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Departamento *</label>
+            <select id="departamento">
+              <option value="">— Seleccionar —</option>
+              <option>San Salvador</option><option>Santa Ana</option><option>San Miguel</option>
+              <option>La Libertad</option><option>Sonsonate</option><option>Usulután</option>
+              <option>La Paz</option><option>Chalatenango</option><option>Cuscatlán</option>
+              <option>La Unión</option><option>Morazán</option><option>Cabañas</option>
+              <option>San Vicente</option><option>Ahuachapán</option>
+            </select>
+            <span class="error-msg" id="regError_departamento"></span>
+          </div>
+          <div class="form-group">
+            <label>Dirección / Referencia</label>
+            <input type="text" id="direccion" placeholder="Km 12, Bodega 3…">
+          </div>
+          <div class="form-group">
+            <label>Latitud (GPS)</label>
+            <input type="text" id="lat" readonly placeholder="Usar botón GPS">
+          </div>
+          <div class="form-group">
+            <label>Longitud (GPS)</label>
+            <input type="text" id="lng" readonly placeholder="Usar botón GPS">
+          </div>
+          <div class="form-group full">
+            <button type="button" class="btn-geo" onclick="obtenerGPS('lat','lng','regGeoStatus')">
+              📡 Capturar ubicación GPS automáticamente
+            </button>
+            <span class="geo-status" id="regGeoStatus"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="reset" class="btn btn-outline" id="btnReset">Limpiar</button>
+        <button type="submit" class="btn btn-primary btn-lg">Guardar vehículo</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- MAPA SV -->
+  <section id="mapa" class="section">
+    <div class="page-header">
+      <h1>🗺️ Mapa SV <span class="badge badge-live">LEAFLET</span></h1>
+      <p class="subtitle">Distribución geográfica de vehículos por departamento</p>
+    </div>
+
+    <div class="mapa-leyenda" id="mapaLeyenda"></div>
+    <p class="mapa-info" id="mapaInfo">Cargando mapa…</p>
+
+    <div class="mapa-layout">
+      <div id="mapaSV"></div>
+      <div class="mapa-side">
+        <div class="dept-stats-card">
+          <h3>Vehículos por departamento</h3>
+          <div id="mapaDeptStats"><p class="empty-hint">Sin datos.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIMA -->
+  <section id="clima" class="section">
+    <div class="page-header">
+      <h1>🌤 Clima <span class="badge badge-api">API</span></h1>
+      <p class="subtitle">Datos en tiempo real vía Open-Meteo y Geolocalización</p>
+    </div>
+
+    <div class="form-card" style="max-width:480px;">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">
+        Consulta el clima actual de tu ubicación usando la <strong>Fetch API</strong> y
+        <code style="background:var(--bg3);padding:1px 6px;border-radius:4px;font-size:12px;">open-meteo.com</code>.
+      </p>
+      <button class="btn btn-primary" onclick="cargarClima()">Obtener clima actual</button>
+    </div>
+
+    <div id="climaResult" class="clima-result"></div>
+  </section>
+
+</main>
+
+<!-- MODAL EDITAR -->
+<div id="editModal" class="modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+    <div class="modal-title">✏️ Editar vehículo</div>
+
+    <form id="editForm" novalidate>
+      <input type="hidden" id="edit_id">
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="form-group">
+          <label>Placa *</label>
+          <input type="text" id="edit_placa">
+          <span class="error-msg" id="editError_placa"></span>
+        </div>
+        <div class="form-group">
+          <label>Marca *</label>
+          <input type="text" id="edit_marca">
+          <span class="error-msg" id="editError_marca"></span>
+        </div>
+        <div class="form-group">
+          <label>Modelo *</label>
+          <input type="text" id="edit_modelo">
+          <span class="error-msg" id="editError_modelo"></span>
+        </div>
+        <div class="form-group">
+          <label>Año *</label>
+          <input type="number" id="edit_anio" min="1900" max="2027">
+          <span class="error-msg" id="editError_anio"></span>
+        </div>
+        <div class="form-group">
+          <label>Color *</label>
+          <input type="text" id="edit_color">
+          <span class="error-msg" id="editError_color"></span>
+        </div>
+        <div class="form-group">
+          <label>Tipo</label>
+          <select id="edit_tipo">
+            <option value="">— Seleccionar —</option>
+            <option>Sedán</option><option>SUV</option><option>Pick-up</option>
+            <option>Hatchback</option><option>Van</option><option>Camión</option><option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Estado *</label>
+          <select id="edit_estado">
+            <option value="">— Seleccionar —</option>
+            <option>Disponible</option><option>Vendido</option><option>Reservado</option>
+          </select>
+          <span class="error-msg" id="editError_estado"></span>
+        </div>
+        <div class="form-group">
+          <label>Precio ($) *</label>
+          <input type="number" id="edit_precio" min="0" step="0.01">
+          <span class="error-msg" id="editError_precio"></span>
+        </div>
+        <div class="form-group">
+          <label>Origen</label>
+          <select id="edit_origen">
+            <option value="">— Seleccionar —</option>
+            <option>El Salvador</option><option>Japón</option><option>Estados Unidos</option>
+            <option>Corea del Sur</option><option>Alemania</option><option>México</option><option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Departamento *</label>
+          <select id="edit_departamento">
+            <option value="">— Seleccionar —</option>
+            <option>San Salvador</option><option>Santa Ana</option><option>San Miguel</option>
+            <option>La Libertad</option><option>Sonsonate</option><option>Usulután</option>
+            <option>La Paz</option><option>Chalatenango</option><option>Cuscatlán</option>
+            <option>La Unión</option><option>Morazán</option><option>Cabañas</option>
+            <option>San Vicente</option><option>Ahuachapán</option>
+          </select>
+          <span class="error-msg" id="editError_departamento"></span>
+        </div>
+        <div class="form-group">
+          <label>Dirección / Referencia</label>
+          <input type="text" id="edit_direccion">
+        </div>
+        <div class="form-group">
+          <label>Latitud GPS</label>
+          <input type="text" id="edit_lat" readonly>
+        </div>
+        <div class="form-group">
+          <label>Longitud GPS</label>
+          <input type="text" id="edit_lng" readonly>
+        </div>
+        <div class="form-group full">
+          <button type="button" class="btn-geo" onclick="obtenerGPS('edit_lat','edit_lng','editGeoStatus')">
+            📡 Actualizar ubicación GPS
+          </button>
+          <span class="geo-status" id="editGeoStatus"></span>
+        </div>
+        <div class="form-group full">
+          <label>Notas</label>
+          <textarea id="edit_notas"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" onclick="closeModal('editModal')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/validation.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/geolocation.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/crud.js"></script>
+<script src="js/mapa.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,179 +1,108 @@
-// ==========================================
-// Web Worker - Procesamiento en Segundo Plano
-// ==========================================
+/**
+ * worker.js
+ * Web Worker – Procesamiento intensivo en segundo plano
+ * DTW135 – GT02 · AutoInventario v2
+ */
 
-// Listener para mensajes del hilo principal
-self.addEventListener('message', (event) => {
-    try {
-        const { type, vehicles } = event.data;
+self.addEventListener('message', (e) => {
+  try {
+    const { type, payload } = e.data;
 
-        if (type === 'calculateStats') {
-            const stats = calculateStatistics(vehicles);
-            self.postMessage({
-                type: 'statsCalculated',
-                data: stats
-            });
-        }
-
-    } catch (error) {
-        console.error('Error en el Web Worker:', error);
-        self.postMessage({
-            type: 'error',
-            message: error.message
-        });
+    if (type === 'CALC_STATS') {
+      const stats = calcularEstadisticas(payload);
+      self.postMessage({ type: 'STATS_READY', payload: stats });
     }
+
+    if (type === 'DEPRECIATION_BATCH') {
+      const results = payload.map(v => calcularDepreciacion(v));
+      self.postMessage({ type: 'DEPRECIATION_READY', payload: results });
+    }
+
+  } catch (err) {
+    self.postMessage({ type: 'WORKER_ERROR', payload: err.message });
+  }
 });
 
-// ==========================================
-// FUNCIONES DE ESTADÍSTICAS
-// ==========================================
+function calcularEstadisticas(vehiculos) {
+  const total      = vehiculos.length;
+  const disponible = vehiculos.filter(v => v.estado === 'Disponible').length;
+  const vendido    = vehiculos.filter(v => v.estado === 'Vendido').length;
+  const reservado  = vehiculos.filter(v => v.estado === 'Reservado').length;
 
-function calculateStatistics(vehicles) {
-    return {
-        totalVehicles: calculateTotalVehicles(vehicles),
-        availableVehicles: calculateByStatus(vehicles, 'Disponible'),
-        soldVehicles: calculateByStatus(vehicles, 'Vendido'),
-        maintenanceVehicles: calculateByStatus(vehicles, 'En mantenimiento'),
-        averagePrice: calculateAveragePrice(vehicles),
-        byStatus: groupByStatus(vehicles),
-        priceStatistics: calculatePriceStatistics(vehicles),
-        yearStatistics: calculateYearStatistics(vehicles)
-    };
+  const precios    = vehiculos.map(v => parseFloat(v.precio) || 0);
+  const valorTotal = precios.reduce((a, b) => a + b, 0);
+  const precioMin  = total ? Math.min(...precios) : 0;
+  const precioMax  = total ? Math.max(...precios) : 0;
+  const precioProm = total ? valorTotal / total : 0;
+  const mediana    = total ? calcMediana(precios) : 0;
+
+  // Agrupar por marca (top 7)
+  const marcasMap = {};
+  vehiculos.forEach(v => {
+    const m = (v.marca || 'Otro').trim();
+    marcasMap[m] = (marcasMap[m] || 0) + 1;
+  });
+  const marcas = Object.entries(marcasMap).sort((a, b) => b[1] - a[1]).slice(0, 7);
+
+  // Agrupar por año
+  const aniosMap = {};
+  vehiculos.forEach(v => {
+    if (v.anio) aniosMap[v.anio] = (aniosMap[v.anio] || 0) + 1;
+  });
+  const anios = Object.entries(aniosMap).sort((a, b) => a[0] - b[0]);
+
+  // Agrupar por departamento
+  const deptMap = {};
+  vehiculos.forEach(v => {
+    if (v.departamento) deptMap[v.departamento] = (deptMap[v.departamento] || 0) + 1;
+  });
+  const deptos = Object.entries(deptMap).sort((a, b) => b[1] - a[1]);
+
+  // Agrupar por tipo
+  const tipoMap = {};
+  vehiculos.forEach(v => {
+    const t = v.tipo || 'Otro';
+    tipoMap[t] = (tipoMap[t] || 0) + 1;
+  });
+  const tipos = Object.entries(tipoMap).sort((a, b) => b[1] - a[1]);
+
+  // Categorías de precio
+  const economicos = vehiculos.filter(v => v.precio < 15000).length;
+  const estandar   = vehiculos.filter(v => v.precio >= 15000 && v.precio < 30000).length;
+  const premium    = vehiculos.filter(v => v.precio >= 30000 && v.precio < 60000).length;
+  const lujo       = vehiculos.filter(v => v.precio >= 60000).length;
+
+  return {
+    total, disponible, vendido, reservado,
+    valorTotal, precioMin, precioMax, precioProm, mediana,
+    marcas, anios, deptos, tipos,
+    categorias: { economicos, estandar, premium, lujo },
+    estados: [disponible, vendido, reservado],
+    ubicaciones: Object.keys(deptMap).length,
+    procesadoEn: new Date().toLocaleTimeString('es-SV')
+  };
 }
 
-function calculateTotalVehicles(vehicles) {
-    return vehicles.length;
+function calcMediana(arr) {
+  const sorted = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 
-function calculateByStatus(vehicles, status) {
-    return vehicles.filter(v => v.status === status).length;
+function calcularDepreciacion(vehiculo) {
+  const edad = new Date().getFullYear() - vehiculo.anio;
+  let depr = 0;
+  if (edad >= 1) depr = 0.15;
+  if (edad >= 2) depr = 0.15 + Math.min(edad - 1, 10) * 0.08;
+  return {
+    id: vehiculo.id,
+    placa: vehiculo.placa,
+    valorEstimado: Math.round(vehiculo.precio * (1 - depr)),
+    depreciacion: Math.round(depr * 100),
+    categoria: vehiculo.precio < 15000 ? 'Económico'
+             : vehiculo.precio < 30000 ? 'Estándar'
+             : vehiculo.precio < 60000 ? 'Premium' : 'Lujo'
+  };
 }
 
-function calculateAveragePrice(vehicles) {
-    if (vehicles.length === 0) return 0;
-    
-    const totalPrice = vehicles.reduce((sum, vehicle) => sum + vehicle.price, 0);
-    return totalPrice / vehicles.length;
-}
-
-function groupByStatus(vehicles) {
-    const grouped = {
-        'Disponible': [],
-        'Vendido': [],
-        'En mantenimiento': []
-    };
-
-    vehicles.forEach(vehicle => {
-        if (grouped[vehicle.status]) {
-            grouped[vehicle.status].push(vehicle.id);
-        }
-    });
-
-    return grouped;
-}
-
-function calculatePriceStatistics(vehicles) {
-    if (vehicles.length === 0) {
-        return {
-            totalPrice: 0,
-            averagePrice: 0,
-            minPrice: 0,
-            maxPrice: 0,
-            medianPrice: 0
-        };
-    }
-
-    const prices = vehicles.map(v => v.price).sort((a, b) => a - b);
-    const totalPrice = prices.reduce((sum, price) => sum + price, 0);
-
-    return {
-        totalPrice: totalPrice,
-        averagePrice: totalPrice / prices.length,
-        minPrice: prices[0],
-        maxPrice: prices[prices.length - 1],
-        medianPrice: calculateMedian(prices)
-    };
-}
-
-function calculateYearStatistics(vehicles) {
-    if (vehicles.length === 0) return {};
-
-    const groupedByYear = {};
-    
-    vehicles.forEach(vehicle => {
-        if (!groupedByYear[vehicle.year]) {
-            groupedByYear[vehicle.year] = 0;
-        }
-        groupedByYear[vehicle.year]++;
-    });
-
-    return groupedByYear;
-}
-
-// ==========================================
-// FUNCIONES AUXILIARES
-// ==========================================
-
-function calculateMedian(sortedArray) {
-    const n = sortedArray.length;
-    if (n % 2 === 0) {
-        return (sortedArray[n / 2 - 1] + sortedArray[n / 2]) / 2;
-    }
-    return sortedArray[Math.floor(n / 2)];
-}
-
-// ==========================================
-// FUNCIONES DE PROCESAMIENTO INTENSIVO
-// ==========================================
-
-/**
- * Simula procesamiento intensivo para demostrar el uso de Web Workers
- * Esta función no bloquea la interfaz de usuario
- */
-function processLargeDataset(vehicles) {
-    const results = [];
-    
-    // Procesar cada vehículo
-    vehicles.forEach(vehicle => {
-        // Cálculos adicionales complejos
-        const processingResult = {
-            id: vehicle.id,
-            plate: vehicle.plate,
-            depreciationRate: calculateDepreciation(vehicle.year),
-            estimatedValue: calculateEstimatedValue(vehicle),
-            taxCategory: calculateTaxCategory(vehicle)
-        };
-        
-        results.push(processingResult);
-    });
-
-    return results;
-}
-
-function calculateDepreciation(year) {
-    const currentYear = new Date().getFullYear();
-    const age = currentYear - year;
-    
-    // Depreciación aproximada: 15% primer año, 10% años siguientes
-    if (age === 0) return 0;
-    if (age === 1) return 0.15;
-    return 0.15 + (Math.min(age - 1, 10) * 0.10);
-}
-
-function calculateEstimatedValue(vehicle) {
-    const depreciation = calculateDepreciation(vehicle.year);
-    return vehicle.price * (1 - depreciation);
-}
-
-function calculateTaxCategory(vehicle) {
-    if (vehicle.price < 10000) return 'Económico';
-    if (vehicle.price < 30000) return 'Estándar';
-    if (vehicle.price < 60000) return 'Premium';
-    return 'Lujo';
-}
-
-// ==========================================
-// LOG DEL WORKER
-// ==========================================
-
-console.log('Web Worker inicializado - Listo para procesar datos');
+console.log('[Worker] AutoInventario Web Worker v2 listo.');
