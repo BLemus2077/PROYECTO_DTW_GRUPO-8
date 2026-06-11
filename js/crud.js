@@ -1,8 +1,4 @@
-/**
- * crud.js
- * Operaciones CRUD del inventario
- * DTW135 – GT02 · AutoInventario v2
- */
+//Operaciones CRUD del inventario
 
 const Inventario = {
   _filtro: '',
@@ -66,7 +62,7 @@ const Inventario = {
     this.render();
   },
 
-  // ── CREAR ────────────────────────────────────────────────────────
+  // CREAR 
   handleAdd(e) {
     e.preventDefault();
     const datos = this._leerFormulario('reg');
@@ -87,7 +83,7 @@ const Inventario = {
     }
   },
 
-  // ── EDITAR ───────────────────────────────────────────────────────
+  // EDITAR
   abrirEdicion(id) {
     const v = Storage.getById(id);
     if (!v) { showToast('Vehículo no encontrado', 'error'); return; }
@@ -145,7 +141,7 @@ const Inventario = {
     }
   },
 
-  // ── ELIMINAR ─────────────────────────────────────────────────────
+  // ELIMINAR 
   eliminar(id) {
     const v = Storage.getById(id);
     if (!v) return;
@@ -161,7 +157,7 @@ const Inventario = {
     }
   },
 
-  // ── HELPERS ──────────────────────────────────────────────────────
+  // HELPERS 
   _leerFormulario(prefix) {
     const g = id => {
       const el = document.getElementById(`${prefix === 'reg' ? '' : 'edit_'}${id}`);

@@ -1,8 +1,4 @@
-/**
- * geolocation.js
- * Geolocalización GPS para formularios
- * DTW135 – GT02 · AutoInventario v2
- */
+// Geolocalización GPS para formularios
 
 function obtenerGPS(latId, lngId, statusId) {
   const statusEl = document.getElementById(statusId);

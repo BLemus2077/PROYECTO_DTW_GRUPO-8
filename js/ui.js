@@ -1,8 +1,4 @@
-/**
- * ui.js
- * Utilidades de interfaz: toasts, modales, secciones
- * DTW135 – GT02 · AutoInventario v2
- */
+// Utilidades de interfaz: toasts, modales, secciones
 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));

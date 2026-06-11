@@ -1,8 +1,4 @@
-/**
- * app.js
- * Punto de entrada – inicialización y event listeners
- * DTW135 – GT02 · AutoInventario v2
- */
+//Punto de entrada – inicialización y event listeners
 
 document.addEventListener('DOMContentLoaded', () => {
   Storage.seedIfEmpty();

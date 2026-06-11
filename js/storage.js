@@ -1,14 +1,10 @@
-/**
- * storage.js
- * Módulo de almacenamiento: LocalStorage + SessionStorage
- * DTW135 – GT02 · AutoInventario v2
- */
+// Módulo de almacenamiento: LocalStorage + SessionStorage
 
 const STORAGE_KEY = 'autoInventario_vehiculos';
 const SESSION_KEY = 'autoInventario_session';
 
 const Storage = {
-  // ── LocalStorage ──────────────────────────────────────────────────
+  // LocalStorage
   getAll() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -76,7 +72,7 @@ const Storage = {
     return this.getAll().find(v => v.id === id) || null;
   },
 
-  // ── SessionStorage ────────────────────────────────────────────────
+  // SessionStorage
   logAction(accion, detalle) {
     try {
       const log = this.getSessionLog();
@@ -105,7 +101,7 @@ const Storage = {
     return sessionStorage.getItem('lastVisit') || 'Primera visita';
   },
 
-  // ── Datos de ejemplo ──────────────────────────────────────────────
+  // Datos de ejemplo
   seedIfEmpty() {
     if (this.getAll().length > 0) return;
     const ejemplos = [

@@ -1,8 +1,4 @@
-/**
- * worker.js
- * Web Worker – Procesamiento intensivo en segundo plano
- * DTW135 – GT02 · AutoInventario v2
- */
+// Web Worker – Procesamiento intensivo en segundo plano
 
 self.addEventListener('message', (e) => {
   try {

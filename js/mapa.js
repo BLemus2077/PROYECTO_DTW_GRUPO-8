@@ -1,9 +1,5 @@
-/**
- * mapa.js
- * Mapa interactivo de El Salvador con Leaflet
- * Marcadores por vehículo + panel de estadísticas por departamento
- * DTW135 – GT02 · AutoInventario v2
- */
+// Mapa interactivo de El Salvador con Leaflet
+//Marcadores por vehículo + panel de estadísticas por departamento
 
 const ESTADO_COLORS = {
   'Disponible' : '#2ecc71',

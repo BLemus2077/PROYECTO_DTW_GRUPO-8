@@ -1,8 +1,4 @@
-/**
- * validation.js
- * Validación de formularios
- * DTW135 – GT02 · AutoInventario v2
- */
+// Validación de formularios
 
 function validarVehiculo(datos, modoEdicion = false, idActual = null) {
   const errores = {};

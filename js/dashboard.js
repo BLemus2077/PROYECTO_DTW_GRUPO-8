@@ -1,7 +1,4 @@
-/**
- * dashboard.js
- * Dashboard – métricas, gráficas canvas, Web Worker
- */
+// Dashboard – métricas, gráficas canvas, Web Worker
 
 const COLORS = {
   disponible : '#16a34a',

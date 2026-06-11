@@ -1,8 +1,4 @@
-/**
- * api.js
- * Integración con API externa: Open-Meteo (clima)
- * DTW135 – GT02 · AutoInventario v2
- */
+// api.js que muestra el clima actual
 
 const WMO = {
   0 : { label:'Despejado',             icon:'☀️'  },
